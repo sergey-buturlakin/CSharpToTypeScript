@@ -60,14 +60,20 @@ namespace CSharpToTypeScript.CLITool.Commands
         [Option(ShortName = "q", Description = "Set quotation marks for import statements & identifiers")]
         public QuotationMark QuotationMark { get; set; }
 
+        [Option(ShortName = "e", Description = "File with exclusion list")]
+        public string ExclusionFile { get; set; }
+
+        [Option(ShortName = "sf", Description = "Generate all definitions to single file")]
+        public bool SingleFile { get; set; }
+
         [Option(ShortName = "ort", Description = "Generate fields with reference type as optional")]
         public bool OptionalReferenceTypes { get; set; }
 
-        [Option(ShortName = "ns", Description = "Do not add semicolon after field definition")]
-        public bool NoSemicolon { get; set; }
-
         [Option(ShortName = "eas", Description = "Use string values for enums equal to names")]
         public bool EnumAsString { get; set; }
+
+        [Option(ShortName = "ns", Description = "Do not add semicolon after field definition")]
+        public bool NoSemicolon { get; set; }
 
         private void OnBeforeArgumentsSet()
         {

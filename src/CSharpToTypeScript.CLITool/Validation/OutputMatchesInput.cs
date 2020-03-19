@@ -11,7 +11,7 @@ namespace CSharpToTypeScript.CLITool.Validation
         protected override ValidationResult IsValid(object value, ValidationContext context)
         {
             if (value is CommandBase command
-            && command.Output?.EndsWithFileExtension() == true && command.Input?.EndsWithFileExtension() == false)
+            && command.Output?.EndsWithFileExtension() == true && command.Input?.EndsWithFileExtension() == false && !command.SingleFile)
             {
                 return new ValidationResult("If your Output is a file, your Input has to be a file as well.");
             }

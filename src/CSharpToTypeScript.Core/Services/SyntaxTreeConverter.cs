@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using CSharpToTypeScript.Core.Models;
+
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -18,12 +20,15 @@ namespace CSharpToTypeScript.Core.Services
             _rootEnumConverter = rootEnumConverter;
         }
 
-        public FileNode Convert(CompilationUnitSyntax root)
-            => new FileNode(ConvertRootNodes(root));
+        public FileNode Convert(CompilationUnitSyntax root, Func<string, bool> predicate)
+            => new FileNode(ConvertRootNodes(root, predicate));
 
-        private IEnumerable<RootNode> ConvertRootNodes(CompilationUnitSyntax root)
+        private IEnumerable<RootNode> ConvertRootNodes(CompilationUnitSyntax root, Func<string, bool> predicate)
             => root.DescendantNodes()
-                .Where(node => (node is TypeDeclarationSyntax type && IsNotStatic(type)) || node is EnumDeclarationSyntax)
+                .Where(node => 
+                    (node is TypeDeclarationSyntax type && IsNotStatic(type) || node is EnumDeclarationSyntax)
+                    && predicate(((BaseTypeDeclarationSyntax) node).Identifier.ValueText)
+                )
                 .Select(node => node switch
                 {
                     TypeDeclarationSyntax type => (RootNode)_rootTypeConverter.Convert(type),

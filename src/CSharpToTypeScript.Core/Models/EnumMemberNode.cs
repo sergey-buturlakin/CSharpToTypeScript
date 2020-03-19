@@ -19,10 +19,10 @@ namespace CSharpToTypeScript.Core.Models
             var name = Name.TransformIf(options.ToCamelCase, StringUtilities.ToCamelCase);
 
             return name + (
-                !string.IsNullOrWhiteSpace(Value)
-                    ? " = " + Value?.SquashWhistespace()
-                    : options.EnumAsString
-                        ? " = " + name.InQuotes(options.QuotationMark)
+                options.EnumAsString
+                    ? " = " + name.InQuotes(options.QuotationMark)
+                    : !string.IsNullOrWhiteSpace(Value)
+                        ? " = " + Value?.SquashWhistespace()
                         : string.Empty
             );
         }

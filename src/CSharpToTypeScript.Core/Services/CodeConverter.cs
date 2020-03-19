@@ -1,4 +1,7 @@
+using System;
+
 using CSharpToTypeScript.Core.Options;
+
 using Microsoft.CodeAnalysis.CSharp;
 
 namespace CSharpToTypeScript.Core.Services
@@ -12,8 +15,8 @@ namespace CSharpToTypeScript.Core.Services
             _syntaxTreeConverter = syntaxTreeConverter;
         }
 
-        public string ConvertToTypeScript(string code, CodeConversionOptions options)
-            => _syntaxTreeConverter.Convert(CSharpSyntaxTree.ParseText(code).GetCompilationUnitRoot())
+        public string ConvertToTypeScript(string code, CodeConversionOptions options, Func<string, bool> predicate)
+            => _syntaxTreeConverter.Convert(CSharpSyntaxTree.ParseText(code).GetCompilationUnitRoot(), predicate)
                 .WriteTypeScript(options);
     }
 }
