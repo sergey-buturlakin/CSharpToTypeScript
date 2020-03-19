@@ -17,6 +17,12 @@ namespace CSharpToTypeScript.Core.Models.TypeNodes
 
         public override IEnumerable<string> Requires => Of.Requires;
 
+        public override bool IsOptional(CodeConversionOptions options, out TypeNode of)
+        {
+            of = this;
+            return options.OptionalReferenceTypes;
+        }
+
         public override string WriteTypeScript(CodeConversionOptions options, Context context)
             => // underlying type
             Of.WriteTypeScript(options, context).TransformIf(Of.IsUnionType(options), StringUtilities.Parenthesize)

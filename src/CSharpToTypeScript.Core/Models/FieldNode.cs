@@ -30,6 +30,7 @@ namespace CSharpToTypeScript.Core.Models
             // separator
             + "?".If(Type.IsOptional(options, out _)) + ": "
             // type
-            + (Type.IsOptional(options, out var of) ? of.WriteTypeScript(options, context) : Type.WriteTypeScript(options, context)) + ";";
+            + (Type.IsOptional(options, out var of) ? of.WriteTypeScript(options, context) : Type.WriteTypeScript(options, context))
+            + (options.NoSemicolon ? string.Empty : ";");
     }
 }

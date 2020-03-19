@@ -15,6 +15,16 @@ namespace CSharpToTypeScript.Core.Models
         public string Value { get; }
 
         public string WriteTypeScript(CodeConversionOptions options, Context context)
-            => Name + (" = " + Value?.SquashWhistespace()).If(!string.IsNullOrWhiteSpace(Value));
+        {
+            var name = Name.TransformIf(options.ToCamelCase, StringUtilities.ToCamelCase);
+
+            return name + (
+                !string.IsNullOrWhiteSpace(Value)
+                    ? " = " + Value?.SquashWhistespace()
+                    : options.EnumAsString
+                        ? " = " + name.InQuotes(options.QuotationMark)
+                        : string.Empty
+            );
+        }
     }
 }

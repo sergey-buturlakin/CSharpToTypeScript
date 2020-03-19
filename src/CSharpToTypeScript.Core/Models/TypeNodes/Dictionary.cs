@@ -17,6 +17,12 @@ namespace CSharpToTypeScript.Core.Models.TypeNodes
 
         public override IEnumerable<string> Requires => Key.Requires.Concat(Value.Requires).Distinct();
 
+        public override bool IsOptional(CodeConversionOptions options, out TypeNode of)
+        {
+            of = this;
+            return options.OptionalReferenceTypes;
+        }
+
         public override string WriteTypeScript(CodeConversionOptions options, Context context)
             => "{ [key: " + Key.WriteTypeScript(options, context) + "]: " + Value.WriteTypeScript(options, context) + "; }";
     }

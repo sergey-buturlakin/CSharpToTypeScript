@@ -11,6 +11,12 @@ namespace CSharpToTypeScript.Core.Models.TypeNodes
 
         public override IEnumerable<string> Requires => new[] { Name };
 
+        public override bool IsOptional(CodeConversionOptions options, out TypeNode of)
+        {
+            of = this;
+            return options.OptionalReferenceTypes;
+        }
+
         public override string WriteTypeScript(CodeConversionOptions options, Context context)
             => Name.TransformIf(options.RemoveInterfacePrefix && !context.GenericTypeParameters.Contains(Name), StringUtilities.RemoveInterfacePrefix);
     }
