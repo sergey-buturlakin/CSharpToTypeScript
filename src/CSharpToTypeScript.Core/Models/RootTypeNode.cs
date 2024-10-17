@@ -34,8 +34,9 @@ namespace CSharpToTypeScript.Core.Models
             context = context.Clone();
             context.GenericTypeParameters = GenericTypeParameters;
 
-            // keywords
-            return "export ".If(options.Export) + "interface "
+            return ("// @ts-ignore" + NewLine).If(TsIgnore)
+                // keywords
+                + "export ".If(options.Export) + "interface "
                 // name
                 + Name.TransformIf(options.RemoveInterfacePrefix, StringUtilities.RemoveInterfacePrefix)
                 // generic type parameters

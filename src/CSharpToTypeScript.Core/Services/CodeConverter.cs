@@ -15,7 +15,7 @@ namespace CSharpToTypeScript.Core.Services
             _syntaxTreeConverter = syntaxTreeConverter;
         }
 
-        public string ConvertToTypeScript(string code, CodeConversionOptions options, Func<string, bool> predicate)
+        public string ConvertToTypeScript(string code, CodeConversionOptions options, Func<string, IgnoreMode> predicate)
             => _syntaxTreeConverter.Convert(CSharpSyntaxTree.ParseText(code).GetCompilationUnitRoot(), predicate)
                 .WriteTypeScript(options);
     }

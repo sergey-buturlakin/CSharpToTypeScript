@@ -18,14 +18,15 @@ namespace CSharpToTypeScript.Core.Models
         public IEnumerable<EnumMemberNode> Members { get; }
 
         public override string WriteTypeScript(CodeConversionOptions options, Context context)
-            =>  // keywords
-            "export ".If(options.Export) + "enum "
-             // name
-             + Name
+            => ("// @ts-ignore" + NewLine).If(TsIgnore)
+            // keywords
+            + "export ".If(options.Export) + "enum "
+            // name
+            + Name
             // body
             + " {" + NewLine
             // members
-            + Members.WriteTypeScript(options, context).Indent(options.UseTabs, options.TabSize).LineByLine(separator: ",") + NewLine
+            + Members.WriteTypeScript(options, context).Indent(options.UseTabs, options.TabSize).LineByLine(",") + NewLine
             + "}";
     }
 }

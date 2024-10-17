@@ -60,27 +60,21 @@ namespace CSharpToTypeScript.CLITool.Commands
         [Option(ShortName = "q", Description = "Set quotation marks for import statements & identifiers")]
         public QuotationMark QuotationMark { get; set; }
 
-        [Option(ShortName = "e", Description = "File with exclusion list")]
-        public string ExclusionFile { get; set; }
+        [Option(ShortName = "if", LongName = "ignore-file", Description = "File with types exclude/ignore list")]
+        public string IgnoreFile { get; set; }
 
-        [Option(ShortName = "sf", Description = "Generate all definitions to single file")]
+        [Option(ShortName = "sf", LongName = "single-file", Description = "Generate all definitions to single file")]
         public bool SingleFile { get; set; }
 
-        [Option(ShortName = "ort", Description = "Generate fields with reference type as optional")]
+        [Option(ShortName = "ort", LongName = "optional-reference-types", Description = "Generate fields with reference type as optional")]
         public bool OptionalReferenceTypes { get; set; }
 
-        [Option(ShortName = "eas", Description = "Use string values for enums equal to names")]
+        [Option(ShortName = "eas", LongName = "enum-as-string", Description = "Use string values for enums equal to names")]
         public bool EnumAsString { get; set; }
 
-        [Option(ShortName = "ns", Description = "Do not add semicolon after field definition")]
+        [Option(ShortName = "ns", LongName = "no-semicolon", Description = "Do not add semicolon after field definition")]
         public bool NoSemicolon { get; set; }
 
-        private void OnBeforeArgumentsSet()
-        {
-            if (ConfigurationFile.Load() is Configuration configuration)
-            {
-                configuration.Override(this);
-            }
-        }
+        private void OnBeforeArgumentsSet() => ConfigurationFile.Load()?.Override(this);
     }
 }

@@ -14,6 +14,7 @@ namespace CSharpToTypeScript.CLITool.Commands
     Subcommand(typeof(InitializeCommand))]
     public class ConvertCommand : CommandBase
     {
+        private static readonly Dictionary<string, IgnoreMode> _ignoreFile = new();
         private readonly ICodeConverter _codeConverter;
         private readonly IFileNameConverter _fileNameConverter;
 
@@ -54,13 +55,16 @@ namespace CSharpToTypeScript.CLITool.Commands
 
         private void OnInputIsFile()
         {
-            var exclusions = GetExclusions().TryGetValue(Input, out var set) ? set : null;
-
-            if (exclusions == _ignoreFile)
+            var ignores = GetIgnores().GetValueOrDefault(Input);
+            
+            if (ignores == _ignoreFile)
                 return;
-
+            
             var content = File.ReadAllText(Input);
-            var converted = _codeConverter.ConvertToTypeScript(content, CodeConversionOptions, name => exclusions?.Contains(name) != true);
+            
+            var converted = _codeConverter.ConvertToTypeScript(content, CodeConversionOptions,
+                name => ignores?.GetValueOrDefault(name, IgnoreMode.None) ?? IgnoreMode.None);
+            
             var outputPath = GetOutputFilePath(Input, Output, CodeConversionOptions);
 
             CreateOrUpdateFile(outputPath, converted, PartialOverride);
@@ -68,26 +72,26 @@ namespace CSharpToTypeScript.CLITool.Commands
 
         private void OnInputIsDirectory()
         {
-            var exclusions = GetExclusions();
+            var ignores = GetIgnores();
 
             var files = FileSystem.GetFilesWithExtension(Input, "cs")
                 .Select(f =>
                 {
                     var relativePath = Path.GetRelativePath(Input, f);
-
                     return new
                     {
                         InputPath = f,
                         RelativePath = relativePath,
-                        Exclusions = exclusions.TryGetValue(relativePath, out var set) ? set : null
+                        Ignores = ignores.GetValueOrDefault(relativePath)
                     };
                 })
-                .Where(f => f.Exclusions != _ignoreFile)
+                .Where(f => f.Ignores != _ignoreFile)
                 .Select(f => new
                 {
                     f.InputPath,
                     f.RelativePath,
-                    Content = _codeConverter.ConvertToTypeScript(File.ReadAllText(f.InputPath), CodeConversionOptions, name => f.Exclusions?.Contains(name) != true)
+                    Content = _codeConverter.ConvertToTypeScript(File.ReadAllText(f.InputPath), CodeConversionOptions,
+                        name => f.Ignores?.GetValueOrDefault(name, IgnoreMode.None) ?? IgnoreMode.None)
                 })
                 .Where(f => !string.IsNullOrWhiteSpace(f.Content));
 
@@ -136,14 +140,14 @@ namespace CSharpToTypeScript.CLITool.Commands
             File.WriteAllText(path, content);
         }
 
-        private Dictionary<string, HashSet<string>> GetExclusions()
+        private Dictionary<string, Dictionary<string, IgnoreMode>> GetIgnores()
         {
-            var result = new Dictionary<string, HashSet<string>>();
-
-            if (string.IsNullOrWhiteSpace(ExclusionFile))
+            var result = new Dictionary<string, Dictionary<string, IgnoreMode>>();
+            
+            if (string.IsNullOrWhiteSpace(IgnoreFile))
                 return result;
 
-            foreach (var line in File.ReadLines(ExclusionFile))
+            foreach (var line in File.ReadLines(IgnoreFile))
             {
                 var parts = line.Split(':', 2);
 
@@ -153,18 +157,24 @@ namespace CSharpToTypeScript.CLITool.Commands
                     continue;
                 }
 
-                if (result.TryGetValue(parts[0], out var set))
+                if (result.TryGetValue(parts[0], out var dictionary))
                 {
-                    if (set == _ignoreFile)
+                    if (dictionary == _ignoreFile)
                         continue;
                 }
                 else
                 {
-                    set = new HashSet<string>();
-                    result.Add(parts[0], set);
+                    dictionary = new Dictionary<string, IgnoreMode>();
+                    result.Add(parts[0], dictionary);
                 }
 
-                set.UnionWith(parts[1].Split(',').Where(s => !string.IsNullOrWhiteSpace(s)));
+                foreach (var str in parts[1].Split(',').Where(s => !string.IsNullOrWhiteSpace(s)))
+                {
+                    if (str.StartsWith("-"))
+                        dictionary.TryAdd(str[1..], IgnoreMode.Exclude);
+                    else
+                        dictionary.TryAdd(str, IgnoreMode.Ignore);
+                }
             }
 
             return result;
@@ -175,7 +185,5 @@ namespace CSharpToTypeScript.CLITool.Commands
             : output?.EndsWithFileExtension() == true ? output
             : !string.IsNullOrWhiteSpace(output) ? Path.Join(output, _fileNameConverter.ConvertToTypeScript(input, options))
             : Path.Join(input.ContainingDirectory(), _fileNameConverter.ConvertToTypeScript(input, options));
-
-        private static readonly HashSet<string> _ignoreFile = new HashSet<string>();
     }
 }

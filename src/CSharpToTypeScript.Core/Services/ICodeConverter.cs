@@ -7,6 +7,6 @@ namespace CSharpToTypeScript.Core.Services
 {
     public interface ICodeConverter
     {
-        string ConvertToTypeScript(string code, CodeConversionOptions options, Func<string, bool> predicate);
+        string ConvertToTypeScript(string code, CodeConversionOptions options, Func<string, IgnoreMode> predicate);
     }
 }
